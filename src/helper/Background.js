@@ -1,4 +1,3 @@
-import React, { Component } from 'react';
 import styled from "@emotion/styled/macro";
 export const Hover = styled.div({
     opacity: 0,
@@ -32,7 +31,6 @@ export const DisplayOver = styled.div({
     top: "0",
     width: "100%",
     zIndex: 2,
-    padding: '1rem',
     transition: "background-color 350ms ease",
     backgroundColor: "transparent",
     padding: "20px 20px 0 20px",

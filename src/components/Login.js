@@ -1,13 +1,13 @@
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { TextField, Grid,  Card, Typography, Button, useMediaQuery, Hidden, Snackbar } from '@mui/material';
+import { TextField, Grid,  Card, Typography, Button, Hidden, Snackbar } from '@mui/material';
 import MuiAlert from '@mui/material/Alert';
 import { makeStyles } from '@mui/styles'
 import { useTheme } from '@emotion/react';
-import theme1 from '../theme/Theme';
-import { signin, signup } from '../apicalls/auth';
+import { signin } from '../apicalls/auth';
 import { storeUser,storeUserEngagements } from "../action/action";
+import { setErrorMsg, setLoader, setSuccessMsg } from '../action/action';
 import { Link, withRouter } from 'react-router-dom';
 
 const useStyles = makeStyles(theme=>({
@@ -61,6 +61,7 @@ const Login = (props)=> {
 
     const onSubmit = event => {
         event.preventDefault();
+        dispatch(setLoader(true));
         setUser({
             ...user,error: false
         })
@@ -73,7 +74,7 @@ const Login = (props)=> {
                         error: data.error,
                         success: false
                     });
-                    setErrorOnSubmit(1);
+                    dispatch(setErrorMsg(data.message?data.message:'Login unsuccessful'));
                 }
                 else{
                     setUser({
@@ -84,12 +85,15 @@ const Login = (props)=> {
                         success: true
                     });
                     dispatch(storeUser(data?.user));
-                    setErrorOnSubmit(-1);
+                    dispatch(setSuccessMsg('Login Successful!'));
                     props.history.push('/');
                 }
+                dispatch(setLoader(false))
             })
             .catch(() => {
               console.log("Error in signin");
+              dispatch(setErrorMsg('Login unsuccessful'));
+              dispatch(setLoader(false))
               setErrorOnSubmit(1);
             })
     }
@@ -118,7 +122,6 @@ const Login = (props)=> {
 
 
     const errorMessage = () =>{
-       
     return(
         <div className="row ">
         <div className="col-md-6 offset-sm-3 text-left">
@@ -127,10 +130,9 @@ const Login = (props)=> {
         </div>
         </div>
         </div>
-    )}
+    )}  
 
-   return(
-
+  return(
     <Grid container direction="row" className={classes.root}>
         <Hidden lgDown>
     <Grid item container className={classes.left} style={{transform: 'rotate(270deg)',marginBottom:'auto',marginTop: 'auto'}}  lg={3} xl={3} sm={3}>
@@ -186,7 +188,7 @@ const Login = (props)=> {
             {/* <img src={airplane} alt="send" style={{marginLeft:"1em"}}/> */}
           </Button>
           </Grid>
-          <Grid item container textAlign="center" style={{width:'100%'}} justify="center">
+          <Grid item container textAlign="center" style={{width:'100%',textDecoration:'none',color:'white'}} justify="center">
             <Link to="/register">New User? Register here.</Link>
           </Grid>
         </Grid>

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { 
     Button, 
     Grid, 
@@ -63,8 +64,6 @@ const IdeaTooltip = styled(({ className, ...props }) => (
   <Tooltip {...props} classes={{ popper: className }} />
 ))(({ theme }) => ({
   [`& .${tooltipClasses.tooltip}`]: {
-    // backgroundColor: '#f5f5f9',
-    // color: 'rgba(0, 0, 0, 0.87)',
     maxWidth: '40vw',
     maxHeight: '25vh',
     fontSize: theme.typography.pxToRem(15),
@@ -145,7 +144,7 @@ function Ideas() {
 
   useEffect(() => {
     preload()
-}, [])
+  }, [])
 
   return (
     <div style={{height:'88vh'}}>
@@ -156,9 +155,9 @@ function Ideas() {
               So basically, students can explore their minds and send an event idea to the teachers and teachers review and act upon the intereseting and feasible ideas. Here is the best rated idea with us.
               </Typography>
               <Grid className={classes.viewButton}>
-                {(user && user.role == 1)?
+                {(user && user.role === 1)?
               <Button variant="contained" color="secondary" size="large" onClick={openDialogBox}>
-                 View All
+                View All
               </Button>
               :
               <Link to="/create/idea">
@@ -185,7 +184,6 @@ function Ideas() {
               bgcolor: '#c3bebb' 
             },
           }}
-          // maxWidth="xs"
           TransitionProps={{ onEntering: handleEntering }}
           open={dialogBoxOpen}
         >

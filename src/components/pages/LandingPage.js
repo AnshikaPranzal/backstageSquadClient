@@ -5,9 +5,11 @@ import Ideas from "../Ideas";
 import SearchContent from "../SearchContent";
 import { useSelector } from 'react-redux';
 import AddButtons from "../AddButtons";
+import VenueList from "../Venues";
 
 const LandingPage = () => {
   const searchedData = useSelector(state => state?.searchedData);
+  const user = useSelector(state => state?.user);
   return (
     <div>
       <Header />
@@ -20,6 +22,7 @@ const LandingPage = () => {
           <AllEvents />
           <Ideas />
           <AddButtons/>
+          {(user && user.role === 1) && <VenueList />}
         </>
       )}      
     </div>

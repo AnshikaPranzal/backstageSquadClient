@@ -21,6 +21,7 @@ import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
 import {switchSearchedId} from '../action/action';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
+import { withRouter } from 'react-router-dom';
 import LanguageIcon from '@mui/icons-material/Language';
 import { makeStyles } from '@mui/styles';
 import { API } from '../backend';
@@ -73,34 +74,30 @@ const SearchItem = props => {
 
     const handleEntering = () => {
         if (radioGroupRef.current != null) {
-          radioGroupRef.current.focus();
+            radioGroupRef.current.focus();
         }
     };
-
-    const Edit = () => {
-        handleDialogBox(searchedItem?._id); 
-    }
 
     const Delete = () => {
         handleDialogBox(); 
     }
     return(
         <Dialog
-          sx={{ 
-            '& .MuiDialog-paper': { 
-              maxWidth: '70vw', 
-              maxHeight: '70vh',
-              height:'50vh',
-              bgcolor: '#c3bebb' 
-            },
-          }}
-          TransitionProps={{ onEntering: handleEntering }}
-          open={open}
+            sx={{ 
+                '& .MuiDialog-paper': { 
+                maxWidth: '70vw', 
+                maxHeight: '70vh',
+                height:'50vh',
+                bgcolor: '#c3bebb' 
+                },
+            }}
+            TransitionProps={{ onEntering: handleEntering }}
+            open={open}
         >
             <DialogTitle>
             <Typography variant="h5">{searchedItem?.name}</Typography> 
-          </DialogTitle>
-          <DialogContent dividers>
+            </DialogTitle>
+            <DialogContent dividers>
             <div className={classes.dialogCont}>
                 <div className={classes.speakerImage}>
                     <img 
@@ -110,51 +107,51 @@ const SearchItem = props => {
                     />
                 </div>
                 <div className={classes.speakerDetails}>
-                   <Typography>
-                      {searchedItem?.about} <br/>
-                      {searchedItem?.linkedinUrl && (
-                          <Typography>
-                            LinkedIn Account : &nbsp;
-                            <Link href={searchedItem?.linkedinUrl} target="_blank" underline="hover" color="#242423">
-                                <LinkedInIcon className={classes.iconLinks}/>
-                            </Link><br/>
-                          </Typography>
-                      )}
-                      {searchedItem?.githubUrl && (
+                    <Typography>
+                        {searchedItem?.about} <br/>
+                        {searchedItem?.linkedinUrl && (
+                            <Typography>
+                                LinkedIn Account : &nbsp;
+                                <Link href={searchedItem?.linkedinUrl} target="_blank" underline="hover" color="#242423">
+                                    <LinkedInIcon className={classes.iconLinks}/>
+                                </Link><br/>
+                            </Typography>
+                        )}
+                        {searchedItem?.githubUrl && (
                         <Typography>
                             GitHub Account : &nbsp;
                             <Link href={searchedItem?.githubUrl} target="_blank" underline="hover" color="#242423">
                                 <GitHubIcon className={classes.iconLinks}/>
                             </Link><br/>
                         </Typography>)}
-                      {searchedItem?.portfolioUrl && (
+                        {searchedItem?.portfolioUrl && (
                         <Typography>
                             Portfolio Account : &nbsp;
                             <Link href={searchedItem?.portfolioUrl} target="_blank" underline="hover" color="#242423">
                                 <LanguageIcon className={classes.iconLinks}/>
                             </Link><br/>
                         </Typography>)}
-                      Vaccination Status : &nbsp; {vaccine[searchedItem?.vaccineStatus]}<br/>
-                  </Typography>                  
+                        Vaccination Status : &nbsp; {vaccine[searchedItem?.vaccineStatus]}<br/>
+                    </Typography>                  
                 </div>      
             </div>
-          </DialogContent>
-          <DialogActions>
-          <div style={{    
+            </DialogContent>
+            <DialogActions>
+            <div style={{    
                 position: 'relative',
                 marginRight: '20vw'}}>
             <Button autoFocus onClick={handleDialogBox} variant="outlined" color="secondary">
                 Close
             </Button>
-          </div>
-        
-        <Button onClick={Edit} color="secondary" variant="contained">Edit</Button>
+            </div>
+            <Button color="secondary" variant="contained" href={`edit/speaker/${searchedItem?._id}`}>Edit</Button>
+        &nbsp;&nbsp;&nbsp;&nbsp;
         <Button onClick={Delete} color="secondary" variant="contained">Delete</Button>
-      </DialogActions>
+        </DialogActions>
     </Dialog>
     )
 }
-const SearchContent = () => {
+const SearchContent = (props) => {
 
     const dispatch = useDispatch();
     const classes = useStyles();
@@ -173,10 +170,12 @@ const SearchContent = () => {
     }
 
     const selectEvent = (item,index) => {
-        if(searchId == 1){
+        if(searchId === 1){
             setSearchItem(item);
             setOpenSearchItem(true);
-        }      
+        } else if( searchId === 2) {
+            props.history.push(`/event/${item?._id}`);
+        }     
     }
     
     if(searchLoading){
@@ -274,4 +273,4 @@ const SearchContent = () => {
         );
         }
 }
-export default SearchContent;
+export default withRouter(SearchContent);

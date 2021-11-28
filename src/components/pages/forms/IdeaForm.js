@@ -2,15 +2,13 @@ import React, { useState } from 'react';
 import { TextField, 
           Grid,  
           Typography,
-          Button, 
-          Snackbar, 
+          Button,  
           Box, 
           Stepper, 
           Step, 
           StepLabel,
-          StepContent, 
-          Paper }  from '@mui/material';
-import MuiAlert from '@mui/material/Alert';
+          StepContent
+        }  from '@mui/material';
 import Header from '../../../utility/Header';
 import theme from '../../../theme/Theme';
 import { makeStyles } from '@mui/styles';
@@ -23,15 +21,10 @@ const useStyles = makeStyles({
     root:{
 
         backgroundColor:"#222222",
-        // height:"98vh",
         width:"80vw",
         margin:"auto",
         padding:"2rem",
         color:"#d3d3d3"
-        
-      //   [theme.breakpoints.down("md")]:{
-      //     paddingLeft:"1rem"
-      // }
     },
   left:{
       marginRight: '10vw',
@@ -59,11 +52,6 @@ const useStyles = makeStyles({
   }
 })
 
-const Alert = React.forwardRef(function Alert(props, ref) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
-
-
 const steps = [
   {
     label: 'Basic Details',
@@ -84,8 +72,9 @@ const steps = [
 
 export default function IdeaForm() {
 
+    const classes = useStyles();
+
     const [activeStep, setActiveStep] = useState(0);
-    const [errorInSubmission, setErrorInSubmission] = useState(0);
     const userId = useSelector(state => state?.user?._id);
 
     const handleNext = () => {
@@ -95,11 +84,6 @@ export default function IdeaForm() {
     const handleBack = () => {
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
     };
-
-    const handleReset = () => {
-        setActiveStep(0);
-    };
-    const classes = useStyles();
 
     const [values, setValues] = useState({
         subject: '',
@@ -112,7 +96,7 @@ export default function IdeaForm() {
         setValues({
             ...values,error: false, [event.target.id]: event.target.value
           }); 
-         console.log(values);
+        console.log(values);
     }
 
     const dispatch = useDispatch()
@@ -134,7 +118,6 @@ export default function IdeaForm() {
               subject: '',
               content: '',
             });
-            setErrorInSubmission(-1);
           }})
           .catch(() => {
             console.log("Could not create idea");
@@ -168,15 +151,14 @@ export default function IdeaForm() {
                         <Grid item container style={{marginBottom: "0.5em"}} lg={12}>
                     <TextField 
                     value={values[item.name]}
-                  //    fullWidth
-                     onChange={handleChange}
-                     className={classes.inputF}
-                     id={item.name}
-                     required ={item.required}
-                     multiline={item.multiline}
-                     rows={5}
-                     label={item.name} />
-                     </Grid>
+                    onChange={handleChange}
+                    className={classes.inputF}
+                    id={item.name}
+                    required ={item.required}
+                    multiline={item.multiline}
+                    rows={5}
+                    label={item.name} />
+                    </Grid>
                     )
                 })}
                 </Grid>
@@ -202,10 +184,7 @@ export default function IdeaForm() {
             </Step>
             ))}
         </Stepper>
-        
         </Box>
-        
         </>
     );
-        
 }

@@ -6,10 +6,9 @@ import { AppBar,
         useScrollTrigger, 
         Grid,
         Hidden,
-        useMediaQuery} from '@mui/material';
+      } from '@mui/material';
 import { makeStyles } from '@mui/styles'
 import { SearchBar } from './Searchbar';
-import theme from '../theme/Theme';
 import { useSelector } from 'react-redux';
 import { Link,withRouter } from 'react-router-dom';
 import UserMenu from './UserMenu';
@@ -65,8 +64,6 @@ const HeaderContent = ({pathname}) => {
   const userName = useSelector(state => state?.user?.name);
   const user = (userName && userName !== '') ? userName : "Username"; 
 
-  const matchesSm = useMediaQuery(theme.breakpoints.down("sm"))
-  const matchesMd = useMediaQuery(theme.breakpoints.down("lg"))
   return(
     <React.Fragment className={classes.root}>
     <AppBar>
@@ -90,14 +87,10 @@ const HeaderContent = ({pathname}) => {
                 </Link>
               </Grid>}
               <Grid item lg={4} sm={11} alignItems='center'>
-               {pathname==='/' && <SearchBar />}
+                {pathname==='/' && <SearchBar />}
               </Grid>
               <Grid item lg={4} sm={1}>
                 <div className={classes.userButton}> 
-                  {/* <Button variant="text" style={{ color: 'inherit'}}>
-                    {matchesMd? user[0] : user}
-                    <KeyboardArrowDownIcon/>
-                  </Button> */}
                   <UserMenu name={user[0]}/>
                 </div>   
               </Grid>

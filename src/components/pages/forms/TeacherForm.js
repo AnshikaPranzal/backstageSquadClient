@@ -10,11 +10,8 @@ import {
     StepLabel,
     StepContent,
     Paper, 
-    Snackbar, 
     Autocomplete} from '@mui/material';
-// import { makeStyles } from '@mui/styles'
 import theme from '../../../theme/Theme';
-import MuiAlert from '@mui/material/Alert';
 import { makeStyles } from '@mui/styles';
 import { useState } from 'react';
 import Header from '../../../utility/Header';
@@ -47,7 +44,6 @@ const useStyles = makeStyles({
   selectF:{
     width:'50vw',
     height:'3rem',
-    // padding:'27px 14px',
     backgroundColor:'#d3d3d3',
     borderRadius:'8px',
     [theme.breakpoints.down("md")]:{
@@ -82,12 +78,6 @@ const useStyles = makeStyles({
   }
 })
 
-
-const Alert = React.forwardRef(function Alert(props, ref) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
-
-
 const steps = [
   {
     label: 'Upgrade to Teacher',
@@ -112,24 +102,12 @@ export default function TeacherForm() {
 
   const classes = useStyles();
 
-  const [errorInSubmission, setErrorInSubmission] = useState(0);
-
   const [values, setValues] = useState({
     collegeId: '',
     role: 1,
     getaRedirect: false,
     formData: new FormData(),
   });
-
-
-  const handleClose = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    setErrorInSubmission(0);
-  };
-
-  const [instrArray, setInstrArray] = React.useState([]);
 
   const dispatch = useDispatch()
 
@@ -153,7 +131,6 @@ export default function TeacherForm() {
                 ...values,
                 collegeId: ''
               });
-              setErrorInSubmission(-1);
         }
     })
     .catch(()=>{
@@ -167,8 +144,6 @@ export default function TeacherForm() {
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
     
   };
-
-  const[id,setId] = useState('')
 
 const handleChange = event =>{
 
@@ -188,13 +163,11 @@ React.useEffect(() => {
     .then(response => {
       console.log(response)
       setSearchedUser(response);
-      // dispatch(storeSearchResults(response));
     })
     .catch(error => {
       console.log('Error in searching - ', error);
     })
   }
-  // dispatch(handleSearchLoading(false));
 }, [userSearch])
 
   return (
@@ -278,7 +251,6 @@ React.useEffect(() => {
         </Paper>
       )}
     </Box>
-    
     </>
   );
 }

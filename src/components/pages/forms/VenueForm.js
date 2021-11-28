@@ -3,14 +3,12 @@ import { TextField,
           Grid, 
           Typography,
           Button, 
-          Snackbar, 
           Box, 
           Stepper, 
           Step, 
           StepLabel,
           StepContent, 
           Paper }  from '@mui/material';
-import MuiAlert from '@mui/material/Alert';
 import Header from '../../../utility/Header';
 import theme from '../../../theme/Theme';
 import { makeStyles } from '@mui/styles';
@@ -22,15 +20,10 @@ const useStyles = makeStyles({
     root:{
 
         backgroundColor:"#222222",
-        // height:"98vh",
         width:"80vw",
         margin:"auto",
         padding:"2rem",
         color:"#d3d3d3"
-        
-      //   [theme.breakpoints.down("md")]:{
-      //     paddingLeft:"1rem"
-      // }
     },
   left:{
       marginRight: '10vw',
@@ -57,10 +50,6 @@ const useStyles = makeStyles({
     }
   }
 })
-
-const Alert = React.forwardRef(function Alert(props, ref) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
 
 
 const steps = [
@@ -91,8 +80,7 @@ const steps = [
 export default function VenueForm() {
 
     const [activeStep, setActiveStep] = useState(0);
-    const [errorInSubmission, setErrorInSubmission] = useState(0);
-
+  
     const handleNext = () => {
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
     };
@@ -118,15 +106,8 @@ export default function VenueForm() {
         setValues({
             ...values,error: false, [event.target.id]: event.target.value
           }); 
-         console.log(values);
     }
 
-    const handleClose = (event, reason) => {
-      if (reason === 'clickaway') {
-        return;
-      }
-      setErrorInSubmission(0);
-    };
 
     const dispatch = useDispatch()
 
@@ -148,12 +129,11 @@ export default function VenueForm() {
                 noOfSeats: '',
                 address: ''
             });
-            setErrorInSubmission(-1);
           }})
           .catch(() => {
             console.log("Could not create venue");
             dispatch(setLoader(false))
-        dispatch(setErrorMsg('Error in creating Venue'))
+            dispatch(setErrorMsg('Error in creating Venue'))
           })
     }
 
@@ -179,18 +159,17 @@ export default function VenueForm() {
                 {step.fields?.map((item,index)=>{
                     console.log(item,index)
                     return(
-                        <Grid item container style={{marginBottom: "0.5em"}} lg={12}>
+                    <Grid item container style={{marginBottom: "0.5em"}} lg={12}>
                     <TextField 
                     value={values[item.name]}
-                  //    fullWidth
-                     onChange={handleChange}
-                     className={classes.inputF}
-                     id={item.name}
-                     required ={item.required}
-                     multiline={item.multiline}
-                     rows={5}
-                     label={item.name} />
-                     </Grid>
+                    onChange={handleChange}
+                    className={classes.inputF}
+                    id={item.name}
+                    required ={item.required}
+                    multiline={item.multiline}
+                    rows={5}
+                    label={item.name} />
+                    </Grid>
                     )
                 })}
                 </Grid>
@@ -228,16 +207,6 @@ export default function VenueForm() {
             </Paper>
         )}
         </Box>
-        <Snackbar open={errorInSubmission == -1} autoHideDuration={6000} onClose={handleClose}>
-        <Alert onClose={handleClose} severity="success" sx={{ width: '100%' }}>
-        Idea Successfuly Venue!
-        </Alert>
-      </Snackbar>
-      <Snackbar open={errorInSubmission == 1} autoHideDuration={6000} onClose={handleClose}>
-        <Alert onClose={handleClose} severity="error" sx={{ width: '100%' }}>
-        Unable to Create Venue!
-        </Alert>
-      </Snackbar>
         </>
     );
         

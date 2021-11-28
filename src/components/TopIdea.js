@@ -1,7 +1,7 @@
 import { Button, Snackbar, Rating, Typography } from '@mui/material';
 import MuiAlert from '@mui/material/Alert';
 import { makeStyles } from '@mui/styles';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Background, DisplayOver, Hover, Paragraph, SubTitle } from '../helper/Background';
 import { giveRating } from '../apicalls';
 import { useSelector } from 'react-redux';
@@ -78,14 +78,9 @@ function Image() {
                                 value={bestIdea?.avgRating}
                                 style={{zIndex:1}} 
                                 precision={0.5}                               
-                            />
-                            {/* <Typography component="legend">Date Submitted:</Typography>
-                            <Typography variant='body1' style={{fontWeight:'bold'}}>{user?.createdAt?.substr(0,11)}</Typography> */}
-                        {/* </div>
-                        <div style={{textAlign: 'center'}}> */}
-                        
+                            />                       
                     </div>
-                    {(user && user.role == 1) && 
+                    {(user && user.role === 1) && 
                 <Hover>
                 <SubTitle>
                     <Button variant="outlined" color="primary" size="large">

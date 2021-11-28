@@ -10,12 +10,14 @@ import SignUp from './components/SignUp';
 import Base from './utility/Base';
 import Login from './components/Login';
 import EventForm from './components/pages/forms/EventForm';
+import EventEditForm from './components/pages/forms/EventEditForm';
 import IdeaForm from './components/pages/forms/IdeaForm';
 import EventPage from './components/pages/EventPage';
 import { useDispatch, useSelector } from 'react-redux';
 import SearchContent from './components/SearchContent';
 import VenueForm from './components/pages/forms/VenueForm';
 import SpeakerForm from './components/pages/forms/SpeakerForm';
+import SpeakerEditForm from './components/pages/forms/SpeakerEditForm';
 import TeacherForm from './components/pages/forms/TeacherForm';
 import { Cube } from 'styled-loaders-react';
 import { setErrorMsg, setLoader, setSuccessMsg } from './action/action';
@@ -58,6 +60,8 @@ function Routes() {
             <Route exact path="/create/venue" component={VenueForm} />
             <Route exact path="/create/speaker" component={SpeakerForm} />
             <Route exact path="/upgrade/teacher" component={TeacherForm} />
+            <Route exact path="/edit/event/:eventId" component={EventEditForm} />
+            <Route exact path="/edit/speaker/:speakerId" component={SpeakerEditForm} />
           </Switch>
         </Base>
     </BrowserRouter>

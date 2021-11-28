@@ -1,33 +1,24 @@
-import React, { useState } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useState, useEffect } from "react";
 import Header from '../../utility/Header';
-import AllEvents from "../Allevents";
-import Ideas from "../Ideas";
 import { makeStyles } from "@mui/styles";
-import { Avatar, Card, CardContent, Chip, Grid, IconButton, Typography, Box, CardMedia } from "@mui/material";
-import { Background, DisplayOver, Hover, Paragraph, SubTitle } from '../../helper/Background';
+import { Card, CardContent, Chip, Grid, IconButton, Typography, Box, Button, CardMedia } from "@mui/material";
 import { API } from "../../backend";
-import { getEventById, getSpeakerById } from "../../apicalls";
-import { useDispatch, useSelector } from "react-redux";
+import { getEventById } from "../../apicalls";
+import { useSelector } from "react-redux";
 import theme from "../../theme/Theme";
-import { Link } from 'react-router-dom';
 import SkipPreviousIcon from '@mui/icons-material/Language';
 import PlayArrowIcon from '@mui/icons-material/LinkedIn';
 import SkipNextIcon from '@mui/icons-material/GitHub';
+import EditIcon from '@mui/icons-material/Edit';
 const moment = require('moment');
 
-// https://images.pexels.com/photos/2566581/pexels-photo-2566581.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260
-// https://images.pexels.com/photos/7242514/pexels-photo-7242514.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500
-// https://images.pexels.com/photos/7123604/pexels-photo-7123604.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260
-// https://images.pexels.com/photos/7260276/pexels-photo-7260276.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500
-// https://images.pexels.com/photos/1005644/pexels-photo-1005644.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260
-// https://images.pexels.com/photos/796602/pexels-photo-796602.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500
 
 const useStyles = makeStyles({
   root:{
-      backgroundImage: 'url(https://images.pexels.com/photos/7123604/pexels-photo-7123604.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260)',
-      backgroundPosition: "center",
+    backgroundImage: 'url(https://images.pexels.com/photos/7123604/pexels-photo-7123604.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260)',
+    backgroundPosition: "center",
     backgroundSize: "cover",
-    // objectFit: "cover",
     backgroundRepeat: "no-repeat",
     backgroundColor: 'rgba(0,0,0,.5)',
     backgroundBlendMode: 'multiply',
@@ -45,7 +36,6 @@ const useStyles = makeStyles({
     margin:'auto'
   },
   poster:{
-    // maxWidth:'10rem',
     height:'50vh',
     margin:'auto',
     border:'1px solid white'
@@ -62,20 +52,25 @@ const useStyles = makeStyles({
     padding:'2vmin',
     alignItems:'center'
   },
-left:{
-    marginRight: '10vw',
-    letterSpacing: '7px'
-},
-inputF:{
-    backgroundColor:'#d3d3d3',
-    borderRadius:'8px'
-},
-sendButton:{
-  marginTop: "5em",
-  "&:hover":{
-    backgroundColor: "#d3d3d3",
-  }
-}
+  left:{
+      marginRight: '10vw',
+      letterSpacing: '7px'
+  },
+  inputF:{
+      backgroundColor:'#d3d3d3',
+      borderRadius:'8px'
+  },
+  sendButton:{
+    marginTop: "5em",
+    "&:hover":{
+      backgroundColor: "#d3d3d3",
+    }
+  },
+  edit:{
+    position: 'relative',
+    left: '54vw',
+    bottom: '53vh'
+  },
 })
  
 const EventPage = ({match}) => {
@@ -87,9 +82,10 @@ const EventPage = ({match}) => {
     event.target.style.margin = 'auto'
   }
   
-  const[event,setEvent] = useState([])
+  const[event,setEvent] = useState([]);
+  const user = useSelector(state => state?.user);
   const fetchEventById = new Promise((resolve, reject) => {
-    getEventById(match.params.eventId).then((data) => {
+    getEventById(match?.params?.eventId).then((data) => {
       if (data && !data.error) {
         resolve(data);
       } else {
@@ -106,12 +102,10 @@ const EventPage = ({match}) => {
   const time = moment(event?.duration?.startTime);
   console.log(time.format("DD/MM/YY HH:mm"));
   console.log(event)
-  React.useEffect(() => {
+  
+  useEffect(() => {
     preload();
   }, []);
-
-  const dispatch = useDispatch();
-  const speakers = useSelector(state => state?.allSpeakers);
   
   return (
     <div>
@@ -125,6 +119,10 @@ const EventPage = ({match}) => {
               src={`${API}/event/poster/${match.params.eventId}`}
               onLoad={imageLoaded}
             />
+            {user && user?.role === 1 && (
+              <Button href={`/edit/event/${match?.params?.eventId}`} className={classes.edit} variant="contained" color="secondary"><EditIcon/></Button> 
+            )}
+            
         </Grid>
         <Grid item textAlign='center' lg={4} md={6}>
           <Typography variant='h3' style={{fontWeight:'600',color:'#d3d3d3'}}>{event?.title}</Typography>
@@ -184,8 +182,7 @@ const EventPage = ({match}) => {
         </Grid>
           )
           })
-      }
-         
+      }   
 
       {event?.eventCoordinator && (
             <Grid item md={6}>
@@ -229,20 +226,19 @@ const EventPage = ({match}) => {
         <Grid container>
         {event?.description && (
           <Grid container style={{padding:'2em',paddingBottom:'1em'}}>
-         <Typography variant='body1' style={{fontWeight:'600'}}>About the event:</Typography>
-         <Typography variant='body1' style={{padding:'2em'}}>{event?.description}</Typography>
-         </Grid>
+          <Typography variant='body1' style={{fontWeight:'600'}}>About the event:</Typography>
+          <Typography variant='body1' style={{padding:'2em'}}>{event?.description}</Typography>
+          </Grid>
         )}
         {event?.instruction?.length >0 && (
           <Grid container style={{padding:'2em',paddingTop:'1em'}}>
-         <Typography variant='body1' style={{fontWeight:'600'}}>Instructions:</Typography>
-         {event?.instruction?.map((item,index)=>(
-           <Typography variant='body1' style={{padding:'2em'}}>{index+1}{'. '}{item}</Typography>
-         ))}
-         </Grid>
-        )}
+          <Typography variant='body1' style={{fontWeight:'600'}}>Instructions:</Typography>
+          {event?.instruction?.map((item,index)=>(
+            <Typography variant='body1' style={{padding:'2em'}}>{index+1}{'. '}{item}</Typography>
+          ))}
+          </Grid>
+          )}
       </Grid>
-     
       </Grid>
     </div>
   );

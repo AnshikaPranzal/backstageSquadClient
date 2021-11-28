@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useState, useEffect } from 'react';
 import { Button } from "@mui/material";
 import '../style/EventSlider.css';
 import { getAllEventList, getAllSpeakerList, getAllVenueList } from '../apicalls';
@@ -6,33 +7,6 @@ import { API } from '../backend';
 import { Link } from 'react-router-dom';
 import { storeAllEvents, storeAllSpeakers, storeAllVenues } from '../action/action';
 import { useDispatch, useSelector } from 'react-redux';
-
-const slideData = [
-    {
-      index: 0,
-      headline: 'New Fashion Apparel',
-      button: 'View',
-      src: 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/225363/fashion.jpg'
-    },
-    {
-      index: 1,
-      headline: 'In The Wilderness hguhguyg ugeduegf uh jjgghghg In The Wilderness hguhguyg ugeduegf uh jjgghghg',
-      button: 'View',
-      src: 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/225363/forest.jpg'
-    },
-    {
-      index: 2,
-      headline: 'For Your Current Mood',
-      button: 'View',
-      src: 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/225363/guitar.jpg'
-    },
-    {
-      index: 3,
-      headline: 'Focus On The Writing',
-      button: 'View',
-      src: 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/225363/typewriter.jpg'
-    }
-  ]
 
   const fetchEventList = new Promise((resolve, reject) => {
     getAllEventList().then((data) => {
@@ -67,15 +41,7 @@ const fetchVenueList = new Promise((resolve, reject) => {
   
   
 const Slide = (props)=> {
-    // constructor(props) {
-    //   super(props)
-  
-    //   handleMouseMove = handleMouseMove.bind(this)
-    //   handleMouseLeave = handleMouseLeave.bind(this)
-    //   handleSlideClick = handleSlideClick.bind(this)
-    //   imageLoaded = imageLoaded.bind(this)
-    //   slide = React.createRef()
-    // }
+    
     const {slide,index,current} = props
 
     const handleMouseMove = (event) => {
@@ -99,8 +65,7 @@ const Slide = (props)=> {
       event.target.style.opacity = 1
     }
 
-    //  const image = getEventPoster(slide._id)
-      const { src, title } = slide
+      const { title } = slide
       const button = "View"
       let classNames = 'slide'
       
@@ -135,12 +100,7 @@ const Slide = (props)=> {
       )
     
   }
-  
-  
-  // =========================
-  // Slider control
-  // =========================
-  
+ 
   const SliderControl = ({ type, title, handleClick }) => {
     return (
       <button className={`btn btn--${type}`} title={title} onClick={handleClick}>
@@ -150,16 +110,10 @@ const Slide = (props)=> {
       </button>
     )
   }
-  
-  
-  // =========================
-  // Slider
-  // =========================
-  
+
   const Slider =(props)=> {
 
-    const[current,setCurrent] = useState(1)
-    const[direction,setDirection] = useState()
+    const[current,setCurrent] = useState(1);
     
     const handlePreviousClick=() => {
       const previous = current - 1
@@ -228,7 +182,7 @@ const Slide = (props)=> {
             />
           </div>
           <div style={{margin:'auto'}} className="create__event">
-      { (user && user.role == 1) &&
+      { (user && user.role === 1) &&
       <Button style={{margin:'auto'}} variant="contained" color="secondary" href='/create/event' size="large">
         Create Event
       </Button>
@@ -244,14 +198,13 @@ export const EventSlider = () =>{
   const dispatch = useDispatch();
   const eventData = useSelector(state => state?.allEvents);
   const preload = async () => {
-    //fetching all the data in the landing page itself, so that it can be reused later
     const datas = await Promise.all([fetchEventList,fetchSpeakerList,fetchVenueList]);
     dispatch(storeAllEvents(datas[0]));
     dispatch(storeAllSpeakers(datas[1]));
     dispatch(storeAllVenues(datas[2]));
   };
 
-  React.useEffect(() => {
+ useEffect(() => {
     preload();
   }, []);
 

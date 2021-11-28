@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React,{useState, useRef, useEffect} from 'react';
 
 import { 
@@ -15,15 +16,17 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions } from "@mui/material";
+  DialogActions, 
+  useMediaQuery} from "@mui/material";
 import Tooltip, { tooltipClasses } from '@mui/material/Tooltip';
-import theme from "../theme/Theme";
+import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
 import {withRouter } from 'react-router-dom';
 import { makeStyles } from "@mui/styles";
 import { styled } from '@mui/material/styles';
 import { useSelector, useDispatch } from 'react-redux';
 import { storeUserEngagements } from './../action/action';
 import { getUserById } from '../apicalls';
+import theme from '../theme/Theme';
 
 const teacherList = [
   {
@@ -65,9 +68,9 @@ const ImageButton = styled(ButtonBase)(({ theme }) => ({
   position: 'relative',
   height: 200,
   [theme.breakpoints.down('sm')]: {
-    width: '100% !important', // Overrides inline-style
+    width: '100% !important', 
     height: 100,
-
+    
 
   },
   '&:hover, &.Mui-focusVisible': {
@@ -145,12 +148,10 @@ const IdeaTooltip = styled(({ className, ...props }) => (
   <Tooltip {...props} classes={{ popper: className }} />
 ))(({ theme }) => ({
   [`& .${tooltipClasses.tooltip}`]: {
-    // backgroundColor: '#f5f5f9',
-    // color: 'rgba(0, 0, 0, 0.87)',
     maxWidth: '40vw',
     maxHeight: '25vh',
     fontSize: theme.typography.pxToRem(15),
-  },
+  }
 }));
 
 const AddButtons = (props) => {
@@ -166,7 +167,7 @@ const AddButtons = (props) => {
   const user = useSelector(state => state?.user);
   const userEngagements = useSelector(state => state?.userEngagements);
   console.log(userEngagements)
-  const linkList = (user && user?.role == 1) ? teacherList:studentList;
+  const linkList = (user && user?.role === 1) ? teacherList : studentList;
 
   const fetchUserById = (id) => {
     getUserById(id).then((data) => {
@@ -178,7 +179,7 @@ const AddButtons = (props) => {
       }
     });  
   }
-  // console.log((user && user.role == 1),user,user.role,"tralaa")
+  
   const handleClick = (index) => {
     setDialogBxOpen(true);
     setList(index);
@@ -200,9 +201,10 @@ const AddButtons = (props) => {
   const closeDialogBox = () => setDialogBxOpen(false);
 
   useEffect(() => fetchUserById(user?._id),[user?._id]);
+  const matchesSm = useMediaQuery(theme.breakpoints.down("sm"))
 
   return (
-    <Box sx={{ display: 'flex', flexWrap: 'wrap', minWidth: 300, width: '100%' }}>
+    <Box sx={{ display: 'flex', flexWrap: 'wrap', minWidth: 300, width: '100%',marginTop: matchesSm?'10em':'' }}>
       {linkList.map((image,i) => (
         <ImageButton
           focusRipple
@@ -210,8 +212,12 @@ const AddButtons = (props) => {
           style={{
             width: image.width,
           }}
-          onClick={() => handleClick(image.click)}
-          // href={image.path}
+          onClick={() => {
+            if(user && user?.role === 0){
+              handleClick(image.click)
+            }
+          }}
+          href={user && user?.role === 1 && `${image.path}`}
         >
           <ImageSrc style={{ backgroundImage: `url(${image.url})` }} />
           <ImageBackdrop className="MuiImageBackdrop-root" />
@@ -244,12 +250,11 @@ const AddButtons = (props) => {
               bgcolor: '#c3bebb' 
             },
           }}
-          // maxWidth="xs"
           TransitionProps={{ onEntering: handleEntering }}
           open={dialogBoxOpen}
         >
           <DialogTitle>
-            <Typography variant="h5">IDEAS</Typography> 
+            <Typography variant="h5">{list === 0 ? 'COORDINATING EVENTS' : 'IDEAS SUBMITTED'} </Typography> 
           </DialogTitle>
           <DialogContent dividers>
           <List  
@@ -258,6 +263,16 @@ const AddButtons = (props) => {
                   maxWidth: '70vw',
               }}
             >
+            {(dialogContent?.length === 0) &&   (
+                <div className='no-results-ideas'> 
+                  <div style={{paddingLeft:'4vw'}}>
+                    <ErrorOutlineOutlinedIcon fontSize='large'/>
+                  </div>
+                  <br/> 
+                  <Typography>{list === 0 ? 'No coordinated events' : 'No submitted ideas'} </Typography>
+              </div>
+              )
+            }
                 {dialogContent?.map((el,i) => {
                   const name = list === 0 ? el?.title : el?.subject;
                   const content = el?.content;

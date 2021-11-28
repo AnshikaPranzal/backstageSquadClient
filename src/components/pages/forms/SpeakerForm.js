@@ -3,34 +3,27 @@ import { TextField,
           Grid, 
           Typography,
           Button, 
-          Snackbar, 
           Box, 
           Stepper, 
           Step, 
           StepLabel,
           StepContent }  from '@mui/material';
-import MuiAlert from '@mui/material/Alert';
 import Header from '../../../utility/Header';
 import styled from '@emotion/styled/macro';
 import theme from '../../../theme/Theme';
 import { makeStyles } from '@mui/styles';
 import { createSpeaker } from '../../../apicalls';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { setErrorMsg, setLoader, setSuccessMsg } from '../../../action/action';
 
 const useStyles = makeStyles({
     root:{
 
         backgroundColor:"#222222",
-        // height:"98vh",
         width:"80vw",
         margin:"auto",
         padding:"2rem",
         color:"#d3d3d3"
-        
-      //   [theme.breakpoints.down("md")]:{
-      //     paddingLeft:"1rem"
-      // }
     },
   left:{
       marginRight: '10vw',
@@ -65,10 +58,6 @@ const useStyles = makeStyles({
   }
 })
 
-const Alert = React.forwardRef(function Alert(props, ref) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
-
 const Input = styled('input')({
     display: 'none',
   });
@@ -97,8 +86,8 @@ const steps = [
     label: `Let's talk social media.`,
     description: `Give us social media address of the speaker.`,
     fields: [
-       {name:'linkedinUrl' },
-       {name:'githubUrl' }, 
+        {name:'linkedinUrl' },
+        {name:'githubUrl' }, 
     ]
   },
 ];
@@ -106,9 +95,9 @@ const steps = [
 export default function SpeakerForm() {
 
     const [activeStep, setActiveStep] = useState(0);
-    const [errorInSubmission, setErrorInSubmission] = useState(0);
 
-    const classes = useStyles();
+  const dispatch = useDispatch();
+  const classes = useStyles();
 
     const [values, setValues] = useState({
         name: '',
@@ -120,7 +109,7 @@ export default function SpeakerForm() {
         formData: new FormData(),
     });
     
-    const { name, email, picture, about, linkedinUrl, githubUrl, formData} = values;
+    const {formData} = values;
 
     const handleChange = event =>{
       if(!event.target.id)
@@ -141,13 +130,13 @@ export default function SpeakerForm() {
     }
 
     const requiredFieldCheck = new Promise((resolve, reject) => {
-      steps[activeStep]?.fields?.forEach((item,i)=>{
+      steps[activeStep]?.fields?.forEach((item)=>{
           if(!values[item.name] && (item.required)){
               reject("required fields not filled")
           }
           
       })
-      steps[activeStep]?.files?.forEach((item,i)=>{
+      steps[activeStep]?.files?.forEach((item)=>{
           if(!values[item.name] && item.required){
               reject("required fields not filled")
           }
@@ -170,24 +159,12 @@ export default function SpeakerForm() {
       setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
-  const handleReset = () => {
-      setActiveStep(0);
-  };
-
-    const handleClose = (event, reason) => {
-      if (reason === 'clickaway') {
-        return;
-      }
-      setErrorInSubmission(0);
-    };
-    const dispatch = useDispatch()
-
-    const Submit  = event => {
+  const Submit  = event => {
     dispatch(setLoader(true))
     event.preventDefault();
       createSpeaker(formData)
         .then(data =>{
-      dispatch(setLoader(false))
+        dispatch(setLoader(false))
           if(data.error){
             dispatch(setErrorMsg(data.message?data.message:'Error in Creating Speaker'))
           }
@@ -204,7 +181,6 @@ export default function SpeakerForm() {
                 formData: new FormData(),
 
             });
-            setErrorInSubmission(-1);
           }})
           .catch(() => {
             console.log("Could not create speaker");
@@ -238,18 +214,17 @@ export default function SpeakerForm() {
                         <Grid item container style={{marginBottom: "0.5em"}} lg={12}>
                     <TextField 
                     value={values[item.name]}
-                  //    fullWidth
-                     onChange={handleChange}
-                     className={classes.inputF}
-                     id={item.name}
-                     required ={item.required}
-                     multiline={item.multiline}
-                     rows={5}
-                     label={item.name} />
-                     </Grid>
+                    onChange={handleChange}
+                    className={classes.inputF}
+                    id={item.name}
+                    required ={item.required}
+                    multiline={item.multiline}
+                    rows={5}
+                    label={item.name} />
+                    </Grid>
                     )
                 })}
-                {step.files?.map((item,index)=>{
+                {step.files?.map((item)=>{
                   
                   return(
                     <Grid item container style={{marginBottom: "2em",width:'50vw'}} lg={12}>
@@ -265,7 +240,7 @@ export default function SpeakerForm() {
                               <span style={{fontWeight:'600',cursor:'pointer'}} onClick={()=>{setValues({...values, poster:''}) }}>X</span>
                             </span> 
                           ) : "No File Selected"}</span>
-                   </Grid>
+                    </Grid>
                   )
               })}
                 </Grid>
@@ -291,10 +266,7 @@ export default function SpeakerForm() {
             </Step>
             ))}
         </Stepper>
-        
         </Box>
-        
         </>
-    );
-        
+    );   
 }

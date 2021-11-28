@@ -1,11 +1,3 @@
-// const speakers = [
-//     {name: 'Anshika Pranzal', about: 'Coder & Speaker', email: 'anshika@gmail.com'},
-//     {name: 'Poulomi Chandra', about: 'Coder & Speaker', email: 'poulomi@gmail.com'},
-//     {name: 'Saman Ayesha', about: 'Coder & Speaker', email: 'saman@gmail.com'},
-//     {name: 'Rasika Kedia', about: 'Coder & Speaker', email: 'rasika@gmail.com'},
-//     {name: 'Prachet Bhuyan', about: 'Coder & Speaker', email: 'prachet@gmail.com'}
-// ];
-
 const initState = {
     user : {},
     loader: true,
@@ -17,6 +9,7 @@ const initState = {
     allEvents : [],
     allSpeakers: [],
     allVenues: [],
+    userEngagements:{},
     searchedId : 0,
     searchedUser:[],
     searchedData : '',
@@ -101,6 +94,11 @@ const myReducer = (state = initState, action) => {
             return {
                 ...state,
                 allVenues: action.payload
+            }
+        case "STORE_USER_ENGAGEMENTS":
+            return{
+                ...state,
+                userEngagements: action.payload
             }
         default :
             return state;

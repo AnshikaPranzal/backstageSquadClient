@@ -1,14 +1,14 @@
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
-import { TextField, Grid,  Card, Typography, Button, useMediaQuery, Hidden, Snackbar } from '@mui/material';
+import { TextField, Grid, Hidden, Typography, Button } from '@mui/material';
 import MuiAlert from '@mui/material/Alert';
-// import { makeStyles } from '@mui/styles'
 import { useTheme } from '@emotion/react';
 import theme from '../theme/Theme';
 import { signup } from '../apicalls/auth';
 import { Link } from 'react-router-dom';
 import { makeStyles } from '@mui/styles';
-
+import { setErrorMsg, setLoader, setSuccessMsg } from '../action/action';
+import { useDispatch } from 'react-redux';
 
 const useStyles = makeStyles({
     root:{
@@ -47,6 +47,8 @@ const Alert = React.forwardRef(function Alert(props, ref) {
 
 const SignUp = (props)=> {
     const classes = useStyles();
+    const dispatch = useDispatch();
+
     const [user,setUser] = useState({
         name:"",
         email:"",
@@ -64,18 +66,8 @@ const SignUp = (props)=> {
     const [emailHelper, setemailHelper] = useState('');
     const [passwordHelper, setPasswordHelper] = useState('');
     const [contactHelper, setContactHelper] = useState('');
-    const [errorOnSubmit, setErrorOnSubmit] = useState(false);
-    const [successOnSubmit, setSuccessOnSubmit] = useState(false);
-
-    const handleClose = (event, reason) => {
-      if (reason === 'clickaway') {
-        return;
-      }
-      setErrorOnSubmit(false);
-      setSuccessOnSubmit(false);
-    };
-
     const onSubmit = event => {
+      dispatch(setLoader(true));
         event.preventDefault();
         setUser({
             ...user,error: false
@@ -89,7 +81,7 @@ const SignUp = (props)=> {
                         error: data.erroris,
                         success: false
                     });
-                    setErrorOnSubmit(true);
+                    dispatch(setErrorMsg(data.message?data.message:'Signup unsuccessful'));
                 }
                 else{
                     setUser({
@@ -103,13 +95,16 @@ const SignUp = (props)=> {
                         error:"",
                         success: true
                     });
-                    setSuccessOnSubmit(true);
+                    dispatch(setSuccessMsg('Signup Successful!'));
                     props.history.push('/login');
                 }
+                dispatch(setLoader(false));
             })
             .catch(() => {
               console.log("Error in signup");
-              setErrorOnSubmit(true);
+              dispatch(setLoader(false));
+              dispatch(setErrorMsg('Signup unsuccessful'));
+
             })
     }
     const handleChange = event=>{
@@ -167,22 +162,9 @@ const SignUp = (props)=> {
                     </div>
                 </div>
         </div>
-    )
+    );
 
-    const errorMessage = () =>{
-       
-    return(
-        <div className="row ">
-        <div className="col-md-6 offset-sm-3 text-left">
-        <div className="alert alert-danger" style={{display: error ? "" : "none"}}>
-            {error}
-        </div>
-        </div>
-        </div>
-    )}
-
-   return(
-
+  return(
     <Grid container direction="row" className={classes.root}>
         <Hidden lgDown>
     <Grid item container className={classes.left} style={{transform: 'rotate(270deg)',marginBottom:'auto',marginTop: 'auto'}}  lg={3} xl={3} sm={3}>
@@ -198,13 +180,13 @@ const SignUp = (props)=> {
         <Grid item container style={{margin: "auto"}} justify="center" alignItems="center">
           <Grid item container style={{marginBottom: "0.5em"}} lg={12} xl={12} sm={12}>
             <TextField 
-            value={name}
-             fullWidth
-             onChange={handleChange}
-             id="name"
-             className={classes.inputF}
-             required 
-             label="Name" />
+              value={name}
+              fullWidth
+              onChange={handleChange}
+              id="name"
+              className={classes.inputF}
+              required 
+              label="Name" />
           </Grid>
           
           <Grid item container style={{marginBottom: "0.5em"}} lg={12} xl={12} sm={12}>
@@ -286,28 +268,14 @@ const SignUp = (props)=> {
           className={classes.sendButton}
           onClick={onSubmit}
           >
-              
             Submit
-            {/* <img src={airplane} alt="send" style={{marginLeft:"1em"}}/> */}
           </Button>
           </Grid>
         </Grid>
           </Grid>
         </Grid>
-        <Snackbar open={successOnSubmit} autoHideDuration={6000} onClose={handleClose}>
-        <Alert onClose={handleClose} severity="success" sx={{ width: '100%' }}>
-          Sign Up Successful!
-        </Alert>
-      </Snackbar>
-      <Snackbar open={errorOnSubmit} autoHideDuration={6000} onClose={handleClose}>
-        <Alert onClose={handleClose} severity="error" sx={{ width: '100%' }}>
-          Error in Sign Up!
-        </Alert>
-      </Snackbar>
-    </Grid>
-     
-   );
-  }
-  
-  
-  export default SignUp;
+    </Grid>     
+  );
+}
+
+export default SignUp;

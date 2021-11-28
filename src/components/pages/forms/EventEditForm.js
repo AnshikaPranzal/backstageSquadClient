@@ -1,40 +1,30 @@
-/* eslint-disable no-useless-concat */
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable no-unused-vars */
-import React, { useState,useEffect } from 'react';
+import React,{useEffect} from 'react';
 import { 
     TextField, 
-    Grid,  
-    Card, 
+    Grid, 
     Typography, 
     Button, 
-    useMediaQuery, 
-    Hidden, 
-    MenuItem, 
-    InputLabel, 
     FormControl, 
-    Select,
     Box,
     Stepper,
     Step,
     StepLabel,
     StepContent,
-    Paper, 
     FormLabel, 
     FormControlLabel, 
     Radio, 
     RadioGroup,
-    Snackbar, 
     ListItem,
     Chip,
     Autocomplete} from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Link,withRouter } from 'react-router-dom';
 import theme from '../../../theme/Theme';
 import MuiAlert from '@mui/material/Alert';
 import { makeStyles } from '@mui/styles';
+import { useState } from 'react';
 import Header from '../../../utility/Header';
 import styled from '@emotion/styled/macro';
-import { createEvent, getAllSpeakerList, getAllVenueList, search } from '../../../apicalls';
+import { editEvent, getAllSpeakerList, getAllVenueList, search } from '../../../apicalls';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import DateTimePicker from '@mui/lab/DateTimePicker';
@@ -125,43 +115,43 @@ const Input = styled('input')({
 const steps = [
   {
     label: 'Basic Details',
-    description: `Let's start with few basics..`,
+    description: `Let's start with editing the basics..`,
     fields: [
-        {name:'title',required:true},
-        {name:'description',multiline:true,required:true},
+        {name:'title'},
+        {name:'description',multiline:true},
         {name:'instruction'},
     ]
   },
   {
     label: 'Where\'s it happening?',
     description:
-      'You can even add a new venue!!',
+      'You can edit the existing venue!!',
     fields: [
         {name:'joiningLink', avoid:"Offline"}
     ],
     radioFields:[
-        {name:'mode',required:true,values:["Hybrid","Virtual","Offline"]}
+        {name:'mode',values:["Hybrid","Virtual","Offline"]}
     ],
     selectFields:[
-        {name:'venue',required:true,avoid:"Virtual"},
+        {name:'venue',avoid:"Virtual"},
     ]
   },
   {
     label: 'More Information',
     description:
-      'To let know more details, if you can\'t find the speaker here in the list, feel free to add one.',
+      'You can add or delete speakers. If you can\'t find the speaker here in the list, feel free to add one.',
     fields: [
     ],
     files: [
         {name:'poster'}
     ],
     selectFields:[
-        {name:'speaker',required:true},
-        {name:'eventCoordinator',required:true},
+        {name:'speaker'},
+        {name:'eventCoordinator'},
     ],
     timeFields:[
-        {name:"startTime",required:true},
-        {name:"endTime",required:true},
+        {name:"startTime"},
+        {name:"endTime"},
     ]
   },
   
@@ -170,17 +160,18 @@ const steps = [
     description:
       'Payment Stuff!',
     fields: [
-        {name:'amountPayable',required:true,avoid:"Free"}
+        {name:'amountPayable',avoid:"Free"}
     ],
     radioFields:[
-        {name:'paid',required:true,values:["Free","Paid"]}
+        {name:'paid',values:["Free","Paid"]}
     ]
   },
 ];
 
 
-export default function EventForm() {
-  const [activeStep, setActiveStep] = React.useState(0);
+const EventEditForm = (props) => {
+  const [activeStep, setActiveStep] = useState(0);
+  const eventId = props?.match?.params?.eventId; 
 
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
@@ -192,8 +183,10 @@ export default function EventForm() {
 
   const classes = useStyles();
 
-  const speakerList = useSelector(state => state.allSpeakers);
-  const venueList = useSelector(state => state.allVenues);
+
+  const speakerList = useSelector(state => state.allSpeakers)
+  const venueList = useSelector(state => state.allVenues)
+  const [errorInSubmission, setErrorInSubmission] = useState(0);
   
 
   const [values, setValues] = useState({
@@ -226,12 +219,18 @@ export default function EventForm() {
     formData.set('mode','Hybrid')
   };
   
-
-  React.useEffect(() => {
+  useEffect(() => {
     preload();
   }, []);
 
-  const [instrArray, setInstrArray] = useState([]);
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setErrorInSubmission(0);
+  };
+
+  const [instrArray, setInstrArray] = React.useState([]);
 
   const handleDelete = (chipToDelete) => () => {
     setInstrArray((chips) => chips?.filter((chip) => chip.key !== chipToDelete.key));
@@ -240,17 +239,19 @@ export default function EventForm() {
   const dispatch = useDispatch()
 
   const Submit = event =>{
-    dispatch(setLoader(true));
+    dispatch(setLoader(true))
+
     event.preventDefault();
+
     formData.set('instructions',instrArray)
-    createEvent(formData)
+    editEvent(formData,eventId)
     .then( data =>{
-      dispatch(setLoader(false));
-        if(data.error){
-          dispatch(setErrorMsg(data.message?data.message:'Error in Creating Event'));
-        }
-        else{
-            dispatch(setSuccessMsg('Event Successfully Created!'));
+      dispatch(setLoader(false))
+      if(data.error){
+          dispatch(setErrorMsg(data.message?data.message:'Error in Editing Event'))
+      }
+      else{
+            dispatch(setSuccessMsg('Event Successfully Edited!'))
             setValues({
                 ...values,
                 title: '',
@@ -272,84 +273,27 @@ export default function EventForm() {
                 createdProduct: false,
                 formData: new FormData(),
               });
+              props.history.push('/');
         }
     })
     .catch(()=>{
-        dispatch(setLoader(false));
-        dispatch(setErrorMsg('Error in creating Event'));
-        console.log("Error in creating Event");
+        dispatch(setLoader(false))
+        dispatch(setErrorMsg('Error in editing Event'))
+        console.log("Error in editing Event");
     })
 }
-
-  const requiredFieldCheck = new Promise((resolve, reject) => {
-    
-    steps[activeStep]?.fields?.forEach((item,i)=>{
-      if(!values[item.name]){
-        if(item.name === "amountPayable"){
-            if(values.paid === "Paid"){
-                reject("required fields not filled")
-            }
-        }
-        else if(item.name === "joiningLink"){
-          if(values.mode !== "Offline"){
-              reject("Joining Link is required for Virtual and Hybrid events")
-          }
-        }
-        else if((item.required)){
-            reject("required fields not filled")
-        }
-      }
-        
-    })
-    steps[activeStep]?.files?.forEach((item,i)=>{
-      if(!values[item.name]){
-        if(item.required){
-            reject("required fields not filled")
-        }
-      }
-    })
-
-    steps[activeStep]?.radioFields?.forEach((item,i)=>{
-      if(!values[item.name]){
-        if(item.name === "venue"){
-          if(values.mode !== "Virtual"){
-              reject("Venue is required for Offline and Hybrid events")
-          }
-        }
-        else if((item.required)){
-            reject("required fields not filled")
-        }
-      }
-        
-    })
-
-    steps[activeStep]?.timeFields?.forEach((item,i)=>{
-      if(!values[item.name]){
-        if(item.name === "venue"){
-          if(values.mode !== "Virtual"){
-              reject("Venue is required for Offline and Hybrid events")
-          }
-        }
-        else if((item.required)){
-            reject("required fields not filled")
-        }
-      }
-        
-    })
-    resolve("done")
-  })
 
   const venueAvailabilityCheck = (time,id)=>{
     return new Promise((resolve,reject)=>{
       venueList?.filter(e=>{console.log(e); return e._id===values.venue})[0]?.blockedDurations?.forEach((item,index)=>{
         console.log(new Date(item.startTime),new Date(time),new Date(item.endTime))
       
-        if(new Date(item.startTime)<=new Date(time) && new Date(item.endTime)>=new Date(time)){
+        if(new Date(item.startTime)<=new Date(time) && new Date(item.endTime)>=new Date(time)){//startTime or endTime shouldn't be between any duration
           reject('That\'s booked')
         }
         console.log(new Date(time),new Date(item.startTime),new Date(values.startTime))
 
-        if(id==='endTime' && new Date(time)>=new Date(item.startTime) && new Date(values.startTime)<=new Date(item.startTime)){
+        if(id==='endTime' && new Date(time)>=new Date(item.startTime) && new Date(values.startTime)<=new Date(item.startTime)){//if it's end time then the current duration should not have any blocked duration in between
           reject('That\'s booked/have a slot booked')
         }
       })
@@ -357,16 +301,8 @@ export default function EventForm() {
     })
   }
 
-  const handleNext = () => {
-    Promise.resolve(requiredFieldCheck)
-    .then(()=>{
-        setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    })
-    .catch(err=>{
-        dispatch(setErrorMsg("Please fill the required fields"))
-        console.log(err)
-    })
-  };
+  const handleNext = () => setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  
   const {
     mode,
     paid,
@@ -375,7 +311,6 @@ export default function EventForm() {
 
 
   const handleChange = event =>{
-
     if(!event.target.id)
     event.target.id=event.target.name
 
@@ -389,7 +324,7 @@ export default function EventForm() {
         })   
       })
       .catch(err=>{
-        dispatch(setErrorMsg(err))
+        alert(err)
       })
     }
     else{
@@ -401,7 +336,7 @@ export default function EventForm() {
     setValues({
         ...values,error: false, [event.target.id]: event.target.value
       }) 
-    }    
+    }
 }
 
 const handleKeyDown = (event,index) =>{
@@ -413,21 +348,22 @@ const handleKeyDown = (event,index) =>{
   }
 }
 
-const [eventCoordinatorList,setSearchedUser] = useState([]);
-const [userSearch, setUserSearch] = useState('');
-useEffect(() => {
-  
-  if(userSearch !== ''){      
-    search({filter:'user',search:userSearch})
-    .then(response => {
-      console.log(response)
-      setSearchedUser(response);
-    })
-    .catch(error => {
-      console.log('Error in searching - ', error);
-    })
-  }
-}, [userSearch])
+const [eventCoordinatorList,setSearchedUser] = useState([])
+const [userSearch, setUserSearch] = useState('')
+
+
+  useEffect(() => { 
+    if(userSearch !== ''){      
+      search({filter:'user',search:userSearch})
+      .then(response => {
+        console.log(response)
+        setSearchedUser(response);
+      })
+      .catch(error => {
+        console.log('Error in searching - ', error);
+      })
+    }
+  }, [userSearch])
 
 console.log(tempValue,"temp")
 const currentList = (name) =>{
@@ -444,10 +380,11 @@ const currentList = (name) =>{
 } 
 const loader = useSelector(state => state?.loader);
 
+
   return (
       <>
       <Header />
-      <Box className={classes.root}>
+    <Box className={classes.root}>
       <Stepper activeStep={activeStep} orientation="vertical">
         {steps.map((step, index) => (
           <Step key={step.label}>
@@ -475,7 +412,7 @@ const loader = useSelector(state => state?.loader);
                                 ))}
                             </RadioGroup>
                             </FormControl>
-                    </Grid>
+                  </Grid>
                   )
               })}
               {step.fields?.map((item,index)=>{
@@ -490,7 +427,6 @@ const loader = useSelector(state => state?.loader);
                       onKeyDown={(e) => item.name==='instruction' && handleKeyDown(e,instrArray.length+1)}
                       className={classes.inputF}
                       id={item.name}
-                      required ={item.required}
                       multiline={item.multiline}
                       rows={5}
                       label={item.name} />
@@ -501,18 +437,19 @@ const loader = useSelector(state => state?.loader);
                               <ListItem key={index}>
                                 <Chip
                                   color="primary"
-                                  label={data.label}
-                                  onDelete={data.label === 'React' ? undefined : handleDelete(data)}
+                                  label={data?.label}
+                                  onDelete={data?.label === 'React' ? undefined : handleDelete(data)}
                                 />
                               </ListItem>
                             );
                           })
                     
                         )}
-                    </Grid>)}
-                    </>
+                  </Grid>)}
+                  </>
                   )
               })}
+
               {step.selectFields?.map((item,index)=>{
                   return(
                       <>
@@ -524,38 +461,31 @@ const loader = useSelector(state => state?.loader);
                           id={item.name}
                           fullWidth
                           className={classes.inputF}
-                          options={currentList(item.name)?.map(e=>({...e,label:e.name+" | "+(e.collegeId?e.collegeId:e.noOfSeats?e.noOfSeats:e._id)}))}
+                          options={currentList(item?.name)?.map(e=>({...e,label:e?.name+" | "+(e?.collegeId ? e?.collegeId : e?.noOfSeats ? e?.noOfSeats : e?._id)}))}
                           sx={{ width: 300 }}
                           onChange = {(event,newValue)=>{
-                            handleChange({target:{id:item.name,value:newValue._id}});
-                            settempValue({...tempValue, [item.name]:newValue})
+                            handleChange({target:{id:item?.name,value:newValue?._id}});
+                            settempValue({...tempValue, [item?.name]:newValue})
                             
                           }}
-                          value={tempValue[item.name]}
-                          renderInput={(params) => <TextField {...params} value={values[item.name]} onChange={(e)=>{item.name==='eventCoordinator' && setUserSearch(e.target.value)}}  label={item.name} />}
+                          value={tempValue[item?.name]}
+                          renderInput={(params) => <TextField {...params} value={values[item?.name]} onChange={(e)=>{item?.name==='eventCoordinator' && setUserSearch(e.target.value)}}  label={item.name} />}
                         />
                     </Grid>)}
-                    </>
+                  </>
                   )
               })}
               {step.files?.map((item,index)=>{
                   
                   return(
                     <Grid item container style={{marginBottom: "2em",width:'50vw'}} lg={12}>
-                        <label htmlFor={item.name}>
-                            <Input accept="image/*" multiple type="file" value={values[item.name]} onChange={handleChange} id={item.name} />
+                        <label htmlFor={item?.name}>
+                            <Input accept="image/*" multiple type="file" value={values[item?.name]} onChange={handleChange} id={item.name} />
                             <Button variant="contained" component="span">
-                                Upload {item.name} Image
+                                Upload {item?.name} Image
                             </Button>
                         </label>
-                        <span className={classes.imageName}>
-                          {values[item.name] ? (
-                            <span>
-                              {values[item.name].substring(12)}&nbsp; 
-                              <span style={{fontWeight:'600',cursor:'pointer'}} onClick={()=>{setValues({...values, poster:''}) }}>X</span>
-                            </span>
-                          ) : "No File Selected"}
-                        </span>
+                        <span className={classes.imageName}>{values[item?.name]?(<span>{values[item?.name].substring(12)}&nbsp; <span style={{fontWeight:'600',cursor:'pointer'}} onClick={()=>{setValues({...values, poster:''}) }}>X</span></span>):"No File Selected"}</span>
                     </Grid>
                   )
               })}
@@ -564,22 +494,21 @@ const loader = useSelector(state => state?.loader);
                 <>
                 {console.log(venueList,values.venue,venueList?.filter(e=>{ return e._id===values.venue}))}
                 These are the blocked Durations for the chosen venue:
-                {venueList?.filter(e=>{ return e._id===values.venue})[0]?.blockedDurations?.map((item,index)=>(
+                {venueList?.filter(e=>{ return e?._id===values.venue})[0]?.blockedDurations?.map((item,index)=>(
                   <ListItem key={index}>
                     {item.eventId ? (
-                    <a href={`/event/${item.eventId._id}`} target="_blank" style={{textDecoration:'none',cursor:'pointer'}} rel="noreferrer">
+                    <a href={`/event/${item?.eventId?._id}`} target="_blank" style={{textDecoration:'none',cursor:'pointer'}} rel="noreferrer">
                   <Chip
                     color="primary"
-                    label={`${moment(item.startTime).toString().substring(4,26)}`+" to "+`${moment(item.endTime).toString().substring(4,30)}`}
+                    label={`${moment(item?.startTime).toString().substring(4,26)}`+" to "+`${moment(item?.endTime).toString().substring(4,30)}`}
                   />
                   </a>
                   ):(
                   <Chip
                     color="primary"
-                    label={`${moment(item.startTime).toString().substring(4,26)}`+" to "+`${moment(item.endTime).toString().substring(4,30)}`}
+                    label={`${moment(item?.startTime).toString().substring(4,26)}`+" to "+`${moment(item?.endTime).toString().substring(4,30)}`}
                   />
                   )}
-                  {item?.eventId?.eventCoordinator &&
                   <div className={classes.ideaActions}>
                     <a href={`callto:${item?.eventId?.eventCoordinator?.contactNumber}`} target="_blank" style={{textDecoration:'none',cursor:'pointer'}} rel="noreferrer">
                       <DurationTooltip title="Call the Event Coordinator to request venue/time change" aria-label="add" arrow>
@@ -593,7 +522,7 @@ const loader = useSelector(state => state?.loader);
                       </DurationTooltip>
                     </a>
                     
-                  </div> }
+                  </div> 
                 </ListItem>
                 ))}
                 </>
@@ -605,19 +534,19 @@ const loader = useSelector(state => state?.loader);
                         <LocalizationProvider dateAdapter={AdapterDateFns}>
                         <DateTimePicker
                             className={classes.inputF}
-                            label={item.name}
-                            value={values[item.name]}
+                            label={item?.name}
+                            value={values[item?.name]}
                             id={item.name}
-                            disabled = {item.name === 'endTime' && !values['startTime']}
+                            disabled = {item?.name === 'endTime' && !values['startTime']}
                             minDate = {new Date()}
-                            minDateTime = {item.name === 'endTime'?values.startTime:undefined}
-                            onChange={(value)=>handleChange({target:{value,id:item.name}})}
+                            minDateTime = {item?.name === 'endTime' ? values?.startTime : undefined}
+                            onChange={(value)=>handleChange({target:{value,id : item?.name}})}
                             renderInput={(params) => <TextField className={classes.dateF} {...params} />}
                             />
                         </LocalizationProvider>
                     </Grid>
                   )
-              })}    
+              })}
               </Grid>
               <Box sx={{ mb: 2 }}>
                 <div>
@@ -640,9 +569,11 @@ const loader = useSelector(state => state?.loader);
             </StepContent>
           </Step>
         ))}
-      </Stepper> 
+      </Stepper>
+      
     </Box>
     </>
   );
 }
 
+export default withRouter(EventEditForm);

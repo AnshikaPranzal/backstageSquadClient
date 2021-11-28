@@ -214,3 +214,41 @@ export const getUserById = (userId) =>{
     })
     .catch(err => console.log(err))
 }
+
+export const editEvent = (event,id) => {
+    for (var pair of event.entries()) {
+        console.log(pair[0]+ ', ' + pair[1]); 
+    }
+    return fetch(`${API}/event/${id}`, {
+        method: "PUT",
+        headers:{
+            Accept: 'application/json'
+        },
+        body: event
+    })
+    .then(response => {
+        console.log('Response:',response);
+        return response.json(); 
+    })
+    .catch(err => console.log(err));
+}
+
+export const editSpeaker = (speaker,id) => {
+    console.log("here atleast")
+    console.log(speaker.entries())
+    for (var pair of speaker.entries()) {
+        console.log(pair[0]+ ', ' + pair[1]); 
+    }
+    return fetch(`${API}/speaker/${id}`, {
+        method: "PUT",
+        mode: "cors", 
+        headers:{
+            Accept: 'application/json'
+        },
+        body: speaker
+    })
+    .then(response => {
+        return response.json(); 
+    })
+    .catch(err => console.log(err));
+}
