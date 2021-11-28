@@ -10,4 +10,4 @@ password - 123456
 
 # Change API
 
-can switch apis to run local server
+can switch apis in src/backend to run local server
